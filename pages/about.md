@@ -1,6 +1,6 @@
 ---
 layout: page
-title: About
+title: Worldwide Trend for K12 AI Education
 permalink: /about/
 feature-img: "assets/img/pexels/travel.jpeg"
 tags: [About]
