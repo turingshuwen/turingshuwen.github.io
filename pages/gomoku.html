@@ -244,9 +244,20 @@ permalink: /gomoku/
       flex-direction: column;
       justify-content: center;
     }
-
+    .gomoku-mobile .pannels {
+      height: 100%;
+    }
+    .gomoku-mobile .display {
+      height: calc(100vh - 130px);
+    }
     .gomoku-desktop {
       grid-template-columns: 60% 40%;
+    }
+    .gomoku-desktop .pannels {
+      height: calc(100vh - 130px);
+    }
+    .gomoku-desktop .display {
+      height: calc(100vh - 130px);
     }
     .gomoku-desktop .display .chessboard .chessBox-wrapper {
       width: 56%;
@@ -256,7 +267,6 @@ permalink: /gomoku/
     }
 
     .gomoku .display {
-      height: calc(100vh - 260px);
       background-color: #ccc;
     }
     .gomoku .display .chessboard {
@@ -450,7 +460,6 @@ permalink: /gomoku/
       opacity: 0.5;
     }
     .gomoku .pannels {
-      height: calc(100vh - 260px);
       overflow-y: auto;
     }
     .pannels .game-start {
