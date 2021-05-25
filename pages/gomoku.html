@@ -17,8 +17,8 @@ permalink: /gomoku/
   {% include navbar.html %}
   </div>
   <div id="app">
-    <div class="gomoku">
-      <div class="display">
+    <div id="main" class="gomoku" :class="{'gomoku-mobile': isMobile(), 'gomoku-desktop': !isMobile()}">
+      <div class="display" v-show="gameStatus === 'start' || !isMobile()">
         <div class="chessboard">
           <div :class="['left', model.player === 1 ? 'reverse' : '']"><span v-show="gameStatus === 'start' && forbidden">AI Thinking<i class="ani_dot">...</i></span></div>
           <div class="chessBox-wrapper">
@@ -43,7 +43,7 @@ permalink: /gomoku/
           <div :class="['right', model.player === 1 ? 'reverse' : '']"><span v-show="gameStatus === 'start' && !forbidden">Your Turn<i class="ani_dot">...</i></span></div>
         </div>
       </div>
-      <div class="pannels">
+      <div class="pannels" v-show="gameStatus !== 'start' || !isMobile()">
         <pannel label="Game Overview">
           <div style="color: #333">
             <div>Can you beat the Gomoku AI Robot that I built? Try it please! </div>
@@ -97,9 +97,9 @@ permalink: /gomoku/
             label: 'Black(Move First)'
           }],
           board: [],
-          forbidden: true, //玩家禁止下棋
+          forbidden: true,
           gameStatus: '',
-          gameID: '', //每局下棋随机一个游戏ID（解决部分情况下的棋局错误问题）
+          gameID: '',
           step: 0,
           upperHand: 'ai',
           lastMove: null,
@@ -120,6 +120,10 @@ permalink: /gomoku/
         }
       },
       methods: {
+        isMobile() {
+          let flag = navigator.userAgent.match(/(phone|pad|pod|iPhone|iPod|ios|iPad|Android|Mobile|BlackBerry|IEMobile|MQQBrowser|JUC|Fennec|wOSBrowser|BrowserNG|WebOS|Symbian|Windows Phone)/i)
+          return flag;
+        },
         randomString(len) {
           len = len || 6;
           var $chars = 'ABCDEFGHJKMNPQRSTWXYZabcdefhijkmnprstwxyz2345678';
@@ -206,9 +210,6 @@ permalink: /gomoku/
               this.forbidden = true
               this.lastMove = null
           } else {
-            // 如果这里提前结束会有bug --guts
-            // 在等待AI下棋时，结束游戏并立即重新开始，会导致上一局的结果传递到了这一局 --harry
-            // 已修复
             if (this.gameStatus === 'start' && this.gameID === game_id) {
               let x = this.model.size - 1 - parseInt(res.last_move / this.model.size)
               let y = res.last_move % this.model.size
@@ -228,10 +229,34 @@ permalink: /gomoku/
     }
     .gomoku {
       display: grid;
+    }
+    .gomoku-mobile {
+      grid-template-columns: 100%;
+    }
+    .gomoku-mobile .display .chessboard .left, .gomoku-mobile .display .chessboard .right {
+      height: 10%;
+      width: 100%;
+    }
+    .gomoku-mobile .display .chessboard .chessBox-wrapper {
+      width: 100%;
+    }
+    .gomoku-mobile .display .chessboard {
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    .gomoku-desktop {
       grid-template-columns: 60% 40%;
     }
+    .gomoku-desktop .display .chessboard .chessBox-wrapper {
+      width: 56%;
+    }
+    .gomoku-desktop .display .chessboard .left, .gomoku-desktop .display .chessboard .right {
+      width: 22%;
+    }
+
     .gomoku .display {
-      height: calc(100vh - 130px);
+      height: calc(100vh - 260px);
       background-color: #ccc;
     }
     .gomoku .display .chessboard {
@@ -241,10 +266,8 @@ permalink: /gomoku/
       height: calc(100% - 35px);
       display: flex;
       border-radius: 10px;
-      /* https://weai.aishuwen.com/ */
     }
     .gomoku .display .chessboard .left, .gomoku .display .chessboard .right {
-      width: 22%;
       position: relative;
     }
     .gomoku .display .chessboard .left span, .gomoku .display .chessboard .right span {
@@ -272,20 +295,19 @@ permalink: /gomoku/
     .gomoku .display .chessboard .right span {
       top: 25%;
     }
-    .gomoku .display .chessboard .left {
+    .gomoku-desktop .display .chessboard .left {
       background: url("https://weai.aishuwen.com/AI_black.png") 0% 30%/90% no-repeat;
     }
-    .gomoku .display .chessboard .right {
+    .gomoku-desktop .display .chessboard .right {
       background: url("https://weai.aishuwen.com/human_white_eng_v3.png") 100% 90%/90% no-repeat;
     }
-    .gomoku .display .chessboard .left.reverse {
+    .gomoku-desktop .display .chessboard .left.reverse {
       background: url("https://weai.aishuwen.com/AI_white.png") 0% 30%/90% no-repeat;
     }
-    .gomoku .display .chessboard .right.reverse {
+    .gomoku-desktop .display .chessboard .right.reverse {
       background: url("https://weai.aishuwen.com/human_black_eng_v3.png") 100% 90%/90% no-repeat;
     }
     .gomoku .display .chessboard .chessBox-wrapper {
-      width: 56%;
       height: 100%;
       position: relative;
       z-index: 10;
@@ -428,14 +450,14 @@ permalink: /gomoku/
       opacity: 0.5;
     }
     .gomoku .pannels {
-      height: calc(100vh - 130px);
+      height: calc(100vh - 260px);
       overflow-y: auto;
     }
-    .gomoku .pannels .game-start {
+    .pannels .game-start {
       margin-top: 40px;
       padding: 0 10%;
     }
-    .gomoku .pannels .game-start .el-button {
+    .pannels .game-start .el-button {
       width: 100%;
     }
     @keyframes fade {
@@ -541,7 +563,7 @@ permalink: /gomoku/
       color: #7babfe;
     }
     .property-panel .panel {
-      padding: 30px;
+      padding: 20px;
     }
 
 
