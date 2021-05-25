@@ -18,7 +18,7 @@ permalink: /gomoku/
   </div>
   <div id="app">
     <div id="main" class="gomoku" :class="{'gomoku-mobile': isMobile(), 'gomoku-desktop': !isMobile()}">
-      <div class="display" v-show="gameStatus === 'start' || !isMobile()">
+      <div class="display" v-show="showBoard || !isMobile()">
         <div class="chessboard">
           <div :class="['left', model.player === 1 ? 'reverse' : '']"><span v-show="gameStatus === 'start' && forbidden">AI Thinking<i class="ani_dot">...</i></span></div>
           <div class="chessBox-wrapper">
@@ -43,7 +43,7 @@ permalink: /gomoku/
           <div :class="['right', model.player === 1 ? 'reverse' : '']"><span v-show="gameStatus === 'start' && !forbidden">Your Turn<i class="ani_dot">...</i></span></div>
         </div>
       </div>
-      <div class="pannels" v-show="gameStatus !== 'start' || !isMobile()">
+      <div class="pannels" v-show="!showBoard || !isMobile()">
         <pannel label="Game Overview">
           <div style="color: #333">
             <div>Can you beat the Gomoku AI Robot that I built? Try it please! </div>
@@ -105,6 +105,7 @@ permalink: /gomoku/
           lastMove: null,
           backend_url: 'https://gobang.aishuwen.com/weai/alphazero/gomoku_move',
           pg_user_id: 'stu01',
+          showBoard: false
       },
       mounted () {
         this.init()
@@ -160,6 +161,7 @@ permalink: /gomoku/
         start () {
           this.gameID = this.randomString(16)
           this.gameStatus = 'start'
+          this.showBoard = true;
           this.init()
           if (this.model.player === 2) {
             this.pcPut()
@@ -168,6 +170,7 @@ permalink: /gomoku/
           }
         },
         end () {
+          this.showBoard = false;
           this.gameID = ''
           this.gameStatus = ''
           this.lastMove = null
@@ -209,6 +212,7 @@ permalink: /gomoku/
               }
               this.forbidden = true
               this.lastMove = null
+              setTimeout(() => {this.showBoard = false}, 5000)
           } else {
             if (this.gameStatus === 'start' && this.gameID === game_id) {
               let x = this.model.size - 1 - parseInt(res.last_move / this.model.size)
