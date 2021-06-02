@@ -9,8 +9,8 @@ permalink: /gomoku/
 <head>
   <meta charset="utf-8">
   <title>gomoku</title>
-  <script src="https://cdn.jsdelivr.net/npm/vue@2.6.11"></script>
-  <script src="https://cdn.jsdelivr.net/npm/vue-resource@1.5.1"></script>
+  <script src="https://cdn.jsdelivr.net/npm/vue@2.6.13"></script>
+  <script src="https://cdn.jsdelivr.net/npm/vue-resource@1.5.2"></script>
 </head>
 <body>
   <div class='header_gobang'>
@@ -19,7 +19,7 @@ permalink: /gomoku/
   <div id="app">
     <div id="main" class="gomoku" :class="{'gomoku-mobile': isMobile(), 'gomoku-desktop': !isMobile()}">
       <div class="display" v-show="showBoard || !isMobile()">
-        <div class="chessboard">
+        <div  class="chessboard">
           <div :class="['left', model.player === 1 ? 'reverse' : '']"><span v-show="gameStatus === 'start' && forbidden">AI Thinking<i class="ani_dot">...</i></span></div>
           <div class="chessBox-wrapper">
             <div class="chessBox">
@@ -44,31 +44,48 @@ permalink: /gomoku/
         </div>
       </div>
       <div class="pannels" v-show="!showBoard || !isMobile()">
-        <pannel label="Game Overview">
-          <div style="color: #333">
-            <div>Can you beat the Gomoku AI Robot that I built? Try it please! </div>
-            <br/>
-            <div>It is based on AlphaZero, the 3rd generation model of the AlphaGo series published by Google DeepMind in 2017.</div>
+        <div class="property-panel">
+          <div class="panel-wrapper">
+            <p class="panel-label">
+              <i></i>
+              <span>Game Overview</span>
+            </p>
           </div>
-        </pannel>
-        <pannel label="Game Control">
-          <div>
-            <label class="label-text" >Side Selection:</label>
-            <select class="select-text" v-model="model.player" :disabled="this.gameStatus === 'start'">
-              <option :value="option.value"  v-for="option in player_options" :label="option.label"></option>
-            </select>
+          <div class="panel">
+            <div style="color: #333">
+              <div>Can you beat the Gomoku AI Robot that I built? Try it please! </div>
+              <br/>
+              <div>It is based on AlphaZero, the 3rd generation model of the AlphaGo series published by Google DeepMind in 2017.</div>
+            </div>
           </div>
-          <div>
-            <label class="label-text">Board Size:</label>
-            <select class="select-text" v-model="model.size" :disabled="this.gameStatus === 'start'">
-              <option  :value="option.value"  v-for="option in size_options" :label="option.label"></option>
-            </select>
+        </div>
+
+        <div class="property-panel">
+          <div class="panel-wrapper">
+            <p class="panel-label">
+              <i></i>
+              <span >Game Control</span>
+            </p>
           </div>
-          <div class="game-start" >
-            <button v-if="gameStatus === 'start'" class="btn-dark is-round" @click="end">Stop</el-button>
-            <button v-else class="btn-dark is-round" @click="start">Start</el-button>
+          <div class="panel">
+            <div>
+              <label class="label-text" >Side Selection:</label>
+              <select class="select-text" v-model="model.player" :disabled="this.gameStatus === 'start'">
+                <option :value="option.value"  v-for="option in player_options" :label="option.label"></option>
+              </select>
+            </div>
+            <div>
+              <label class="label-text">Board Size:</label>
+              <select class="select-text" v-model="model.size" :disabled="this.gameStatus === 'start'">
+                <option  :value="option.value"  v-for="option in size_options" :label="option.label"></option>
+              </select>
+            </div>
+            <div class="game-start" >
+              <button v-if="gameStatus === 'start'" class="btn-dark is-round" @click="end">Stop</el-button>
+              <button v-else class="btn-dark is-round" @click="start">Start</el-button>
+            </div>
           </div>
-        </pannel>
+        </div>
       </div>
     </div>
   </div>
@@ -241,6 +258,9 @@ permalink: /gomoku/
       height: 10%;
       width: 100%;
     }
+    .gomoku-mobile .display .chessboard .left span, .gomoku-mobile .display .chessboard .right span {
+      font-size: 5vmin;
+    }
     .gomoku-mobile .display .chessboard .chessBox-wrapper {
       width: 100%;
     }
@@ -252,7 +272,7 @@ permalink: /gomoku/
       height: 100%;
     }
     .gomoku-mobile .display {
-      height: calc(100vh - 130px);
+      height: 100vh;
     }
     .gomoku-desktop {
       grid-template-columns: 60% 40%;
@@ -268,6 +288,9 @@ permalink: /gomoku/
     }
     .gomoku-desktop .display .chessboard .left, .gomoku-desktop .display .chessboard .right {
       width: 22%;
+    }
+    .gomoku-desktop .display .chessboard .left span, .gomoku-desktop .display .chessboard .right span {
+      font-size: 3vmin;
     }
 
     .gomoku .display {
@@ -286,7 +309,6 @@ permalink: /gomoku/
     }
     .gomoku .display .chessboard .left span, .gomoku .display .chessboard .right span {
       color: #efffef;
-      font-size: 3vmin;
       position: absolute;
       left: 50%;
       transform: translateX(-50%);
@@ -551,11 +573,12 @@ permalink: /gomoku/
     .property-panel .panel-wrapper .panel-label {
       user-select: none;
       -webkit-user-select: none;
-      font-size: 18px;
+      font-size: 20px;
       color: #333;
       letter-spacing: 1.25px;
       text-align: left;
       margin: 0;
+      padding: 10px;
     }
     .property-panel .panel-wrapper .panel-label i {
       display: inline-block;
@@ -565,7 +588,7 @@ permalink: /gomoku/
       margin-right: 8px;
       background-image: linear-gradient(-180deg, #2183FB 0%, #0441bb 100%);
       border-radius: 6px;
-      vertical-align: text-bottom;
+      vertical-align: middle;
     }
     .property-panel .panel-wrapper .btn-reset {
       padding: 0 20px;
