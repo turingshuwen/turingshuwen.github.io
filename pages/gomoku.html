@@ -164,6 +164,15 @@ permalink: /gomoku/
           this.lastMove = (this.model.size - 1 - i) * this.model.size + j
           this.pcPut()
         },
+        getQuery(v) {
+          let query = window.location.search.substring(1);
+          let vars = query.split("&");
+          for (let i=0; i<vars.length; i++) {
+            let pair = vars[i].split("=");
+            if ( pair[0] == v ) return pair[1]
+          }
+          return(false);
+        },
         init () {
           let val = this.model.size
           this.board = []
@@ -173,6 +182,10 @@ permalink: /gomoku/
               arr.push(0)
             }
             this.board.push(arr)
+          }
+          id = this.getQuery('id')
+          if (id) {
+            this.pg_user_id = this.getQuery('id')
           }
         },
         start () {
