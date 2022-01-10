@@ -1,0 +1,160 @@
+---
+title : ChatBot
+permalink: /chatbot/
+---
+
+<!DOCTYPE html>
+<html lang="en">
+    {% include head.html %}
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, user-scalable=0, minimum-scale=1, maximum-scale=1, viewport-fit=cover"
+    />
+    <meta name="theme-color" content="#000000" />
+    <title>Chat Bot</title>
+    <link rel="stylesheet" type="text/css" href="https://cdn.staticfile.org/chatui-core/1.2.3/index.min.css" />
+    <script src="https://cdn.staticfile.org/react/17.0.2/umd/react.development.js"></script>
+    <script src="https://cdn.staticfile.org/react-dom/17.0.2/umd/react-dom.development.js"></script>
+    <script src="https://cdn.staticfile.org/chatui-core/1.2.3/index.min.js"></script>
+    <script src="https://cdn.staticfile.org/babel-standalone/6.26.0/babel.min.js"></script>
+  </head>
+
+  <body>
+    {% include navbar.html %}
+    <noscript>
+      You need to enable JavaScript to run this app.
+    </noscript>
+    <div >
+      <div id="main" class="main">
+        <div id="root" class="bot-left"></div>
+        <div class="bot-right">
+          <p>
+            Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+          </p>
+          <p>
+            Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+          </p>
+        </div>
+      </div>
+    </div>
+    {% include footer.html %}
+    <script type="text/babel">
+        const rootElement = document.getElementById("root");
+        const defaultQuickReplies = [
+        {
+            // icon: 'message',
+            name: 'hello',
+            isNew: true,
+            isHighlight: false,
+        },
+        {
+            name: 'world',
+            isNew: true,
+        },
+        {
+            name: 'test',
+            isHighlight: false,
+        },
+        {
+            name: 'content',
+        },
+        ];
+
+        const initialMessages = [
+        {
+            type: 'text',
+            content: { text: 'Tell me something' },
+            user: { avatar: 'https://gw.alicdn.com/tfs/TB1DYHLwMHqK1RjSZFEXXcGMXXa-56-62.svg' },
+        },
+        ]
+        function App() {
+            const { messages, appendMsg, setTyping } = ChatUI.useMessages(initialMessages);
+
+            function handleSend(type, val) {
+                if (type === "text" && val.trim()) {
+                appendMsg({
+                    type: "text",
+                    content: { text: val },
+                    position: "right"
+                });
+
+                setTyping(true);
+
+                setTimeout(() => {
+                    appendMsg({
+                    type: "text",
+                    content: { text: "Bala bala" }
+                    });
+                }, 1000);
+                }
+            }
+
+            function handleQuickReplyClick(item) {
+                handleSend('text', item.name);
+            }
+
+            function renderMessageContent(msg) {
+                const { content } = msg;
+                return <ChatUI.Bubble content={content.text} />;
+            }
+
+            let nav = { title: "ChatBot" }
+
+            return (
+                <ChatUI.default locale="en-US"
+                navbar={nav}
+                messages={messages}
+                renderMessageContent={renderMessageContent}
+                quickReplies={defaultQuickReplies}
+                onQuickReplyClick={handleQuickReplyClick}
+                onSend={handleSend}
+                placeholder="Please Input..."
+                rightAction=''
+                />
+            );
+        }
+
+        ReactDOM.render(
+            <React.StrictMode>
+                <App />
+            </React.StrictMode>,
+            rootElement
+        );
+    </script>
+    <style>
+        body {
+            margin: 0;
+        }
+
+        h1 {
+            margin-top: 0;
+            margin-bottom: 0;
+            margin-left: 20px;
+        }
+
+        .main {
+            display: flex;
+            height: 80vh;
+            width: 100%;
+        }
+
+        .bot-left {
+            margin: 20px;
+            width: 50%;
+            height: 100%;
+        }
+
+        .bot-right {
+            margin: 20px;
+            width: 50%;
+            height: 100%;
+        }
+
+        .Message.right {
+            float: none;
+        }
+    </style>
+  </body>
+</html>
