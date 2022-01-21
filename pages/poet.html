@@ -1,0 +1,287 @@
+---
+title : AI Poet
+permalink: /poet/
+---
+
+<!DOCTYPE html>
+<html lang="en">
+    {% include head.html %}
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, user-scalable=0, minimum-scale=1, maximum-scale=1, viewport-fit=cover"
+    />
+    <meta name="theme-color" content="#000000" />
+    <title>AI Poet</title>
+    <link rel="stylesheet" type="text/css" href="https://cdn.staticfile.org/chatui-core/1.2.3/index.min.css" />
+    <script src="https://cdn.staticfile.org/react/17.0.2/umd/react.development.js"></script>
+    <script src="https://cdn.staticfile.org/react-dom/17.0.2/umd/react-dom.development.js"></script>
+    <script src="https://cdn.staticfile.org/chatui-core/1.2.3/index.min.js"></script>
+    <script src="https://cdn.staticfile.org/babel-standalone/6.26.0/babel.min.js"></script>
+  </head>
+
+  <body>
+    {% include navbar.html %}
+    <noscript>
+      You need to enable JavaScript to run this app.
+    </noscript>
+    <div >
+      <div id="main" class="main">
+        <div id="root" class="bot-left"></div>
+        <div class="bot-right">
+            <div class="property-panel">
+              <div class="panel-wrapper">
+                <p class="panel-label">
+                  <i></i>
+                  <span>AI Poet</span>
+                </p>
+              </div>
+              <div class="panel">
+                <div style="color: #333">
+                  <div>NLP is the crown jewel of AI and has been applied to a variety of fields in the real world. </div>
+                  <br/>
+                  <div>With a properly trained model, AI can write decent poems. In this web application, our AI robot will compose acrostic poems, and all you need to do is to provide a theme and the first word for each sentence.</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="property-panel">
+              <div class="panel-wrapper">
+                <p class="panel-label">
+                  <i></i>
+                  <span >Poet Settings</span>
+                </p>
+              </div>
+              <div class="panel">
+                <div style="color: #333">
+                    Please provide four Chinese words in the input box in the conversational UI on the left side of this page. Each word will be the first word of the corresponding sentence in the generated acrostic poem.
+                </div>
+                <br/>
+                <div>
+                  <label class="label-text">Poem Theme:</label>
+                  <select class="select-text" id="poem-theme">
+                    <option>田园</option>
+                    <option>乡愁</option>
+                    <option>忧国</option>
+                    <option>报国</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+        </div>
+      </div>
+    </div>
+    {% include footer.html %}
+    <script type="text/babel">
+        const rootElement = document.getElementById("root");
+        const BACKEND_URL = "https://test.aishuwen.com/parse/functions/poem"
+
+        const initialMessages = [
+        {
+            type: 'text',
+            content: { text: 'Please provide four Chinese words' },
+            // user: { avatar: 'https://gw.alicdn.com/tfs/TB1DYHLwMHqK1RjSZFEXXcGMXXa-56-62.svg' },
+        },
+        ]
+        function App() {
+            const { messages, appendMsg, setTyping } = ChatUI.useMessages(initialMessages);
+
+            function stringLength(str) {
+                var realLength = 0, len = str.length, charCode = -1;
+                for (var i = 0; i < len; i++) {
+                    charCode = str.charCodeAt(i);
+                    if (charCode >= 0 && charCode <= 128){
+                        // realLength += 1;
+                    }
+                    else realLength += 1;
+                }
+                return realLength;
+            }
+
+            function handleSend(type, val) {
+                if (type === "text" && val.trim()) {
+                    appendMsg({
+                        type: "text",
+                        content: { text: val },
+                        position: "right"
+                    });
+
+                    setTyping(true);
+
+                    if (stringLength(val) != 4){
+                        appendMsg({
+                            type: "text",
+                            content: { text: "Invalid head words! " }
+                        });
+                    } else {
+                        get_poem(val)
+                    }
+                }
+            }
+
+            function get_poem(headwords) {
+
+                let theme_element = document.getElementById("poem-theme");
+                let index = theme_element.selectedIndex;
+                let theme = theme_element.options[index].text;
+
+                let data = {
+                    "pg_project_id": "poem",
+                    "theme": theme,
+                    "headwords": headwords
+                }
+
+                fetch(BACKEND_URL, {
+                    method: 'POST',
+                    body: JSON.stringify({data}),
+                    headers: {
+                        'content-type': 'application/json',
+                        'X-Parse-Application-Id': 'weai'
+                    }
+                }).then(res => {
+                    res.json().then((data) => {
+                        console.log(data)
+                        if(data.result.reason){
+                            appendMsg({
+                                type: "text",
+                                content: { text: data.result.reason.name }
+                            });
+                        } else {
+                            appendMsg({
+                                type: "text",
+                                content: { text: data.result.generated }
+                            });
+                        }
+                    })
+                }).catch(e => {
+                    appendMsg({
+                        type: "text",
+                        content: { text: "Network error." }
+                    });
+                });
+
+            }
+
+            function renderMessageContent(msg) {
+                const { content } = msg;
+                return <ChatUI.Bubble content={content.text} />;
+            }
+
+            let nav = { title: "AI Poet" }
+
+            return (
+                <ChatUI.default locale="en-US"
+                navbar={nav}
+                messages={messages}
+                renderMessageContent={renderMessageContent}
+                onSend={handleSend}
+                placeholder="Please Input..."
+                rightAction=''
+                />
+            );
+        }
+
+        ReactDOM.render(
+            <React.StrictMode>
+                <App />
+            </React.StrictMode>,
+            rootElement
+        );
+    </script>
+    <style>
+        body {
+            margin: 0;
+        }
+
+        h1 {
+            margin-top: 0;
+            margin-bottom: 0;
+            margin-left: 20px;
+        }
+
+        .main {
+            display: flex;
+            height: calc(100vh - 150px);
+            width: 100%;
+        }
+
+        .bot-left {
+            margin: 20px;
+            width: 50%;
+            height: 100%;
+        }
+
+        .bot-right {
+            margin: 20px;
+            width: 50%;
+            height: 100%;
+            overflow-y: auto;
+        }
+
+        .Message.right {
+            float: none;
+        }
+
+    /* panel style */
+    .property-panel .panel-wrapper {
+      display: flex;
+      background-color: #FFE081;
+      line-height: 45px;
+    }
+    .property-panel .panel-wrapper .panel-label {
+      user-select: none;
+      -webkit-user-select: none;
+      font-size: 20px;
+      color: #333;
+      letter-spacing: 1.25px;
+      text-align: left;
+      margin: 0;
+      padding: 10px;
+    }
+    .property-panel .panel-wrapper .panel-label i {
+      display: inline-block;
+      width: 6px;
+      height: 6px;
+      margin-left: 24px;
+      margin-right: 8px;
+      background-image: linear-gradient(-180deg, #FFBD32 0%, #A97950 100%);
+      border-radius: 6px;
+      vertical-align: middle;
+    }
+    .property-panel .panel {
+        padding: 20px;
+    }
+
+    .label-text {
+      text-align: right;
+      vertical-align: middle;
+      font-size: 14px;
+      color: #606266;
+      line-height: 40px;
+      padding: 0 12px 0 0;
+      -webkit-box-sizing: border-box;
+      box-sizing: border-box;
+    }
+    .select-text {
+      -webkit-appearance: none;
+      background-color: #FFF;
+      background-image: none;
+      border-radius: 4px;
+      border: 1px solid #DCDFE6;
+      -webkit-box-sizing: border-box;
+      box-sizing: border-box;
+      color: #606266;
+      display: inline-block;
+      font-size: inherit;
+      height: 40px;
+      line-height: 40px;
+      outline: 0;
+      padding: 0 15px;
+      -webkit-transition: border-color .2s cubic-bezier(.645,.045,.355,1);
+      transition: border-color .2s cubic-bezier(.645,.045,.355,1);
+      width: 100%;
+    }
+    </style>
+  </body>
+</html>
