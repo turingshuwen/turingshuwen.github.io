@@ -55,17 +55,24 @@ permalink: /poet/
               </div>
               <div class="panel">
                 <div style="color: #333">
-                    Please provide four Chinese words in the input box in the conversational UI on the left side of this page. Each word will be the first word of the corresponding sentence in the generated acrostic poem.
+                  Please select a theme for the acrostic poem:
                 </div>
                 <br/>
                 <div>
-                  <label class="label-text">Poem Theme:</label>
                   <select class="select-text" id="poem-theme">
                     <option>田园</option>
                     <option>乡愁</option>
                     <option>忧国</option>
                     <option>报国</option>
                   </select>
+                </div>
+                <br/>
+                <div style="color: #333">
+                    Please provide four Chinese words in the input box in the conversational UI on the left side of this page. Each word will be the first word of the corresponding sentence in the generated acrostic poem.
+                </div>
+                <br/>
+                <div>
+                  To try it quickly, simply click the example words above the input box.
                 </div>
               </div>
             </div>
@@ -77,6 +84,8 @@ permalink: /poet/
         const rootElement = document.getElementById("root");
         const BACKEND_URL = "https://test.aishuwen.com/parse/functions/poem"
 
+
+
         const initialMessages = [
         {
             type: 'text',
@@ -87,12 +96,28 @@ permalink: /poet/
         function App() {
             const { messages, appendMsg, setTyping } = ChatUI.useMessages(initialMessages);
 
+            var defaultQuickReplies = [
+              {
+                 name: '精忠报国',
+              },
+              {
+                 name: '床疑举低',
+              },
+              {
+                 name: '肝胆昆仑',
+              },
+              {
+                 name: '余杭四月',
+              },
+            ];
+
+
             function stringLength(str) {
                 var realLength = 0, len = str.length, charCode = -1;
                 for (var i = 0; i < len; i++) {
                     charCode = str.charCodeAt(i);
                     if (charCode >= 0 && charCode <= 128){
-                        // realLength += 1;
+                        realLength == 5;
                     }
                     else realLength += 1;
                 }
@@ -112,10 +137,10 @@ permalink: /poet/
                     if (stringLength(val) != 4){
                         appendMsg({
                             type: "text",
-                            content: { text: "Invalid head words! " }
+                            content: { text: "Invalid words! Please provide exactly FOUR CHINESE words!" }
                         });
                     } else {
-                        get_poem(val)
+                        get_poem(val);
                     }
                 }
             }
@@ -152,6 +177,7 @@ permalink: /poet/
                                 type: "text",
                                 content: { text: data.result.generated }
                             });
+                            defaultQuickReplies.push({name: headwords})
                         }
                     })
                 }).catch(e => {
@@ -162,6 +188,10 @@ permalink: /poet/
                 });
 
             }
+
+            function handleQuickReplyClick(item) {
+                 handleSend('text', item.name);
+             }
 
             function renderMessageContent(msg) {
                 const { content } = msg;
@@ -175,6 +205,8 @@ permalink: /poet/
                 navbar={nav}
                 messages={messages}
                 renderMessageContent={renderMessageContent}
+                quickReplies={defaultQuickReplies}
+                onQuickReplyClick={handleQuickReplyClick}
                 onSend={handleSend}
                 placeholder="Please Input..."
                 rightAction=''
