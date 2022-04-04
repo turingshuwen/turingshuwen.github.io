@@ -32,9 +32,8 @@ permalink: /catdog/
         </div>
         <div style="text-align: center;" v-loading="loading">
             <img v-if="current_img" id="main-img" class="main-img" :src="current_img" @load="onImageLoad" @error="onImageLoadError" crossOrigin="anonymous"/>
-            <el-empty v-if="!current_img" class="main-img" description="Please select a picture"></el-empty>
+            <el-empty v-if="!current_img" class="main-img" description="Please select an image"></el-empty>
         </div>
-        <span>{{ msg }}</span>
         <div class="block">
             <span class="tag" :style="{color: value < 50?'#1989FA':'black'}">Cat</span>
             <el-slider
@@ -44,6 +43,10 @@ permalink: /catdog/
             </el-slider>
             <span class="tag" :style="{color: value > 50?'#1989FA':'black'}">Dog</span>
         </div>
+        <div style="width: 100%;margin: 20px 0 50px 0;text-align: center;">
+          <span style="font-size: 18px; color: #909399;">The Probability of Being "Dog"</span>
+        </div>
+
         <el-dialog title="Your Image" :visible.sync="dialog_visible">
             <div>
                 <el-input
@@ -55,7 +58,7 @@ permalink: /catdog/
             <span slot="footer" class="dialog-footer">
                 <el-button @click="dialog_visible = false">Cancel</el-button>
                 <el-button :disabled="!url_link" type="primary" @click="dialog_visible = false; loadImage(url_link)">OK</el-button>
-                </span>
+            </span>
         </el-dialog>
     </div>
 </div>
@@ -78,25 +81,24 @@ permalink: /catdog/
             //backend_url: 'http://127.0.0.1:9000',
             backend_url: 'https://service-mtg8md36-1302242949.gz.apigw.tencentcs.com/release/',
             current_img: '',
-            msg: '',
             value: 50,
             marks: {
-                0: '100',
-                10: '80',
-                20: '60',
-                30: '40',
-                40: '20',
+                0: '0',
+                10: '0.1',
+                20: '0.2',
+                30: '0.3',
+                40: '0.4',
                 50: {
                     style: {
                         color: '#1989FA'
                     },
-                    label: '0'
+                    label: '0.5'
                 },
-                60: '20',
-                70: '40',
-                80: '60',
-                90: '80',
-                100: '100'
+                60: '0.6',
+                70: '0.7',
+                80: '0.8',
+                90: '0.9',
+                100: '1'
             },
             url_link: null,
             main_img: null,
@@ -141,7 +143,6 @@ permalink: /catdog/
             },
             async loadImage(url = this.default_image[0]) {
                 this.loading = true;
-                this.msg = '';
                 this.value = 50;
                 this.current_img = url;
             },
@@ -168,14 +169,8 @@ permalink: /catdog/
                     if (res.status === 0) {
                         // success
                         this.value = parseFloat(res.msg) * 100;
-                        //if (res.msg > 0.5) {
-                        //    this.msg = `dog: ${res.msg}`
-                        //} else {
-                        //    this.msg = `cat: ${res.msg}`
-                        //}
                     } else {
                         // error
-                        this.msg = res.msg
                         this.$message.error(res.msg);
                     }
                 } catch (e) {
@@ -210,13 +205,12 @@ permalink: /catdog/
     }
 
     .main-img {
-        height: calc(80vh - 410px);
+        height: calc(80vh - 430px);
         margin: 5vh 0 5vh 0;
     }
 
     .block {
         display: flex;
-        margin-bottom: 50px;
     }
 
     .block .slider {
@@ -255,6 +249,11 @@ permalink: /catdog/
 
     .el-empty__description p{
         font-size: 18px;
+        margin-bottom: 10px;
+    }
+
+    .el-empty {
+      flex-direction: column-reverse
     }
 </style>
 </body>
