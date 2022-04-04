@@ -1,0 +1,247 @@
+---
+title : Cat vs Dog
+permalink: /catdog/
+---
+
+<!DOCTYPE html>
+<html lang="en">
+{% include head.html %}
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cat vs Dog</title>
+    <script src="https://cdn.staticfile.org/vue/2.6.9/vue.min.js"></script>
+    <script src="https://cdn.staticfile.org/element-ui/2.15.7/index.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.staticfile.org/element-ui/2.15.7/theme-chalk/index.min.css"></link>
+</head>
+<body style="background: white;">
+{% include navbar.html %}
+<div id="main">
+    <div id="app" class="app">
+        <div class="img-selector">
+            <button class="available-button select-button" @click="loadImage(url)" v-for="url in default_image">
+                <el-image class="available-img" :src="url" lazy>
+                    <div slot="error" class="image-slot">
+                        <i class="el-icon-picture-outline"></i>
+                    </div>
+                </el-image>
+            </button>
+            <el-button class="available-img available-button" @click="dialog_visible = true">Custom</el-button>
+        </div>
+        <div style="text-align: center;" v-loading="loading">
+            <img v-if="current_img" id="main-img" class="main-img" :src="current_img" @load="onImageLoad" @error="onImageLoadError" crossOrigin="anonymous"/>
+            <el-empty v-if="!current_img" class="main-img" description="Please select a picture"></el-empty>
+        </div>
+        <span>{{ msg }}</span>
+        <div class="block">
+            <span class="tag" :style="{color: value < 50?'#1989FA':'black'}">Cat</span>
+            <el-slider
+                    class="slider"
+                    v-model="value"
+                    :marks="marks">
+            </el-slider>
+            <span class="tag" :style="{color: value > 50?'#1989FA':'black'}">Dog</span>
+        </div>
+        <el-dialog title="Custom" :visible.sync="dialog_visible">
+            <div>
+                <el-input
+                        placeholder="Custom image link"
+                        v-model="url_link"
+                        clearable>
+                </el-input>
+            </div>
+            <span slot="footer" class="dialog-footer">
+                <el-button @click="dialog_visible = false">Cancel</el-button>
+                <el-button :disabled="!url_link" type="primary" @click="dialog_visible = false; loadImage(url_link)">OK</el-button>
+                </span>
+        </el-dialog>
+    </div>
+</div>
+{% include footer.html %}
+<script>
+    new Vue({
+        el: '#app',
+        data: {
+            dialog_visible: false,
+            loading: false,
+            default_image: [
+                'https://weai.aishuwen.com/cat_vs_dog/cat.4001.jpg',
+                'https://weai.aishuwen.com/cat_vs_dog/cat.4002.jpg',
+                'https://weai.aishuwen.com/cat_vs_dog/cat.4003.jpg',
+                'https://weai.aishuwen.com/cat_vs_dog/cat.4004.jpg',
+                'https://weai.aishuwen.com/cat_vs_dog/dog.4001.jpg',
+                'https://weai.aishuwen.com/cat_vs_dog/dog.4002.jpg',
+                'https://weai.aishuwen.com/cat_vs_dog/dog.4003.jpg',
+                'https://weai.aishuwen.com/cat_vs_dog/dog.4004.jpg'],
+            //backend_url: 'http://127.0.0.1:9000',
+            backend_url: 'https://service-mtg8md36-1302242949.gz.apigw.tencentcs.com/release/',
+            current_img: '',
+            msg: '',
+            value: 50,
+            marks: {
+                0: '100',
+                10: '80',
+                20: '60',
+                30: '40',
+                40: '20',
+                50: {
+                    style: {
+                        color: '#1989FA'
+                    },
+                    label: '0'
+                },
+                60: '20',
+                70: '40',
+                80: '60',
+                90: '80',
+                100: '100'
+            },
+            url_link: null,
+            main_img: null,
+            request: null
+        },
+        mounted() {
+            this.main_img = document.querySelector('#main-img');
+        },
+        methods: {
+            isMobile() {
+                return navigator.userAgent.match(/(phone|pad|pod|iPhone|iPod|ios|iPad|Android|Mobile|BlackBerry|IEMobile|MQQBrowser|JUC|Fennec|wOSBrowser|BrowserNG|WebOS|Symbian|Windows Phone)/i);
+            },
+            openDialog() {
+
+            },
+            getBase64Image(img) {
+                let canvas = document.createElement("canvas");
+                canvas.width = img.width;
+                canvas.height = img.height;
+                let ctx = canvas.getContext("2d");
+                ctx.drawImage(img, 0, 0, img.width, img.height);
+                return canvas.toDataURL("image/png")
+            },
+            onImageLoad() {
+                console.log("image loaded");
+                if(!this.main_img){
+                    this.main_img = document.querySelector('#main-img');
+                }
+                let base64 = this.getBase64Image(this.main_img);
+                if (this.request) {
+                    clearTimeout(this.request);
+                }
+                this.request = setTimeout(() => {
+                    (async () => {
+                        await this.predict(base64)
+                    })()
+                }, 0);
+            },
+            onImageLoadError() {
+                console.log("image error");
+                this.loading = false;
+                this.$message.error('Please use another picture');
+                this.current_img = null;
+            },
+            async loadImage(url = this.default_image[0]) {
+                this.loading = true;
+                this.msg = '';
+                this.value = 50;
+                this.current_img = url;
+            },
+            sleep(time) {
+                return new Promise((resolve) => setTimeout(resolve, time))
+            },
+            async predict(base64) {
+                // await this.sleep(2000);
+                try {
+                    let data = {
+                        'image': base64
+                    }
+                    let res = await fetch(this.backend_url, {
+                            method: 'POST',
+                            //mode: 'cors',
+                            headers: {
+                                'content-type': 'application/json'
+                            },
+                            body: JSON.stringify(data)
+                        }
+                    )
+                    res = await res.json()
+                    console.log(res)
+                    if (res.status === 0) {
+                        // success
+                        this.value = parseFloat(res.msg) * 100;
+                        //if (res.msg > 0.5) {
+                        //    this.msg = `dog: ${res.msg}`
+                        //} else {
+                        //    this.msg = `cat: ${res.msg}`
+                        //}
+                    } else {
+                        // error
+                        this.msg = res.msg
+                    }
+                } catch (e) {
+                    console.log('loadImage', e)
+                    this.$message.error('Something error');
+                } finally {
+                    this.loading = false;
+                }
+            }
+        }
+    })
+</script>
+<style lang="scss">
+    .available-button {
+        padding: 0;
+        margin: 10px;
+        height: 80px;
+        width: 80px;
+    }
+
+    .select-button {
+      border: 0;
+    }
+
+    .available-img {
+        width: 80px;
+        height: 80px;
+    }
+
+    .available-img img {
+      padding: 0;
+    }
+
+    .main-img {
+        height: calc(80vh - 450px);
+        margin: 10vh 0 10vh 0;
+    }
+
+    .block {
+        display: flex;
+    }
+
+    .block .slider {
+        flex-grow: 4;
+    }
+
+    .block .tag {
+        flex-grow: 1;
+        text-align: center;
+        font-size: xxx-large;
+        font-size: -webkit-xxx-large;
+    }
+
+    .slider {
+        pointer-events: none;
+    }
+
+    .el-slider__bar {
+        background-color: #e4e7ed;
+    }
+
+    .img-selector {
+        display: flex;
+        justify-content: flex-start;
+        width: 100%;
+        overflow-x: auto;
+    }
+</style>
+</body>
+</html>
