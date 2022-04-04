@@ -120,9 +120,7 @@ permalink: /catdog/
             },
             onImageLoad() {
                 console.log("image loaded");
-                if(!this.main_img){
-                    this.main_img = document.querySelector('#main-img');
-                }
+                this.main_img = document.querySelector('#main-img');
                 let base64 = this.getBase64Image(this.main_img);
                 if (this.request) {
                     clearTimeout(this.request);
@@ -176,6 +174,7 @@ permalink: /catdog/
                     } else {
                         // error
                         this.msg = res.msg
+                        this.$message.error(res.msg);
                     }
                 } catch (e) {
                     console.log('loadImage', e)
