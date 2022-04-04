@@ -18,6 +18,7 @@ permalink: /catdog/
 {% include navbar.html %}
 <div id="main">
     <div id="app" class="app">
+        <span style="font-size:18px; margin-left: 10px;">Please select an image</span>
         <div class="img-selector">
             <button class="available-button select-button" @click="loadImage(url)" v-for="url in default_image">
                 <el-image class="available-img" :src="url" lazy>
@@ -32,7 +33,7 @@ permalink: /catdog/
         </div>
         <div style="text-align: center;" v-loading="loading">
             <img v-if="current_img" id="main-img" class="main-img" :src="current_img" @load="onImageLoad" @error="onImageLoadError" crossOrigin="anonymous"/>
-            <el-empty v-if="!current_img" class="main-img" description="Please select an image"></el-empty>
+            <div v-if="!current_img" style="height: 100px"></div>
         </div>
         <div class="block">
             <span class="tag" :style="{color: value < 50?'#1989FA':'black'}">Cat</span>
@@ -43,8 +44,8 @@ permalink: /catdog/
             </el-slider>
             <span class="tag" :style="{color: value > 50?'#1989FA':'black'}">Dog</span>
         </div>
-        <div style="width: 100%;margin: 20px 0 50px 0;text-align: center;">
-          <span style="font-size: 18px; color: #909399;">The Probability of Being "Dog"</span>
+        <div style="width: 100%;margin: 20px 0 20vh 0;text-align: center;">
+          <span style="font-size: 18px;">The Probability of Being "Dog"</span>
         </div>
 
         <el-dialog title="Your Image" :visible.sync="dialog_visible">
@@ -138,7 +139,7 @@ permalink: /catdog/
             onImageLoadError() {
                 console.log("image error");
                 this.loading = false;
-                this.$message.error('Please use another picture');
+                this.$message.error('Please provide a valid image URL');
                 this.current_img = null;
             },
             async loadImage(url = this.default_image[0]) {
@@ -205,8 +206,8 @@ permalink: /catdog/
     }
 
     .main-img {
-        height: calc(80vh - 430px);
-        margin: 5vh 0 5vh 0;
+        height: calc(80vh - 450px);
+        margin: 5vh 10px 5vh 10px;
     }
 
     .block {
