@@ -70,7 +70,7 @@ permalink: /cat-vs-dog/
                </el-tab-pane>
                <el-tab-pane label="Local" name="local">
                   <div style="display: flex; flex-direction: column;">
-                      <el-button icon="el-icon-picture-outline" @click="select_local_image()">Select an image</el-button>
+                      <el-button icon="el-icon-picture-outline" @click="select_local_image()">Select an Image from Your Computer</el-button>
                       <input ref="filElem" type="file" class="hidden" accept="image/*" @change="get_file">
                       <el-image class="available-img" :src="local_url_link" style="margin-top: 10px; align-self: center;">
                           <div slot="error" class="image-slot">
@@ -107,7 +107,7 @@ permalink: /cat-vs-dog/
                 'https://weai.aishuwen.com/cat_vs_dog/dog.4438.jpg',
                 'https://weai.aishuwen.com/cat_vs_dog/dog.4004.jpg'],
             //backend_url: 'http://127.0.0.1:9000/',
-            backend_url: 'https://service-mtg8md36-1302242949.gz.apigw.tencentcs.com/release/',
+            backend_url: 'https://service-475pvvbc-1302242949.gz.apigw.tencentcs.com/release/',
             current_img: '',
             value: 50,
             marks: {
@@ -152,7 +152,7 @@ permalink: /cat-vs-dog/
                 while (this.service_status !== 0) {
                     try {
                         let res = await this.$http.get(url, {
-                            timeout: 5000,
+                            timeout: 20000,
                         })
                         res = res.body;
                         this.service_status = res['status']
@@ -209,7 +209,7 @@ permalink: /cat-vs-dog/
                 return new Promise((resolve) => setTimeout(resolve, time))
             },
             async predict(base64) {
-                await this.sleep(2000);
+                // await this.sleep(2000);
                 try {
                     let data = {
                         'image': base64
@@ -228,7 +228,7 @@ permalink: /cat-vs-dog/
                     }
                 } catch (e) {
                     console.log('loadImage', e)
-                    this.$message.error('Something error');
+                    this.$message.error('Backend busy. Please try again.');
                 } finally {
                     this.loading = false;
                 }
