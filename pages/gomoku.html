@@ -120,7 +120,7 @@ permalink: /gomoku/
           step: 0,
           upperHand: 'ai',
           lastMove: null,
-          backend_url: 'https://gobang.aishuwen.com/weai/alphazero/gomoku_move',
+          backend_url: 'https://test.aishuwen.com/parse/functions/gomokuTuring',
           pg_user_id: 'stu01',
           showBoard: false
       },
@@ -230,8 +230,12 @@ permalink: /gomoku/
             'last_move': this.lastMove,
             'current_player': 'ai'
           }
-          let res = await this.$http.post(this.backend_url,data)
-          res = res.body
+          let res = await this.$http.post(this.backend_url,{data:data},{
+            headers: {
+                'X-Parse-Application-Id': 'weai'
+            }
+          })
+          res = res.body.result
           // let res = await Cloud.run('gomoku', { data })
           if (res.game_end) {
               this.gameStatus = res.winner === 'nobody' ? 'peace' : res.winner === 'ai' ? 'lose' : 'win'
