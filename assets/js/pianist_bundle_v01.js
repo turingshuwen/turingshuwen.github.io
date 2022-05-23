@@ -37802,6 +37802,7 @@
             document.querySelector('#controls').classList.remove('hidden');
             document.querySelector('#keyboard').classList.remove('hidden');
             document.querySelector('#play-area').classList.remove('hidden');
+            document.querySelector('#hint').classList.remove('hidden');
             lstmKernel1 =
                 vars['rnn/multi_rnn_cell/cell_0/basic_lstm_cell/kernel'];
             lstmBias1 = vars['rnn/multi_rnn_cell/cell_0/basic_lstm_cell/bias'];
@@ -38293,7 +38294,7 @@
         setTimeout(function () {
             resettingText.style.opacity = '0';
         }, 1000);
-        setTimeout(resetRnnRepeatedly, RESET_RNN_FREQUENCY_MS);
+        playTimer = setTimeout(resetRnnRepeatedly, RESET_RNN_FREQUENCY_MS);
     }
     
     },{"./keyboard_element":1,"@tensorflow/tfjs-core":9,"tone-piano":107}]},{},[109])(109)
