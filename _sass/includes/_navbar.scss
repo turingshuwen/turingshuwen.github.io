@@ -96,6 +96,40 @@ nav {
   a#pull {
     display: none;
   }
+
+  #projects-menu{
+    display: none;
+  }
+
+  #projects-menu-entry:hover #projects-menu{
+    display: grid;
+  }
+
+  .dropdown-menu {
+    display: grid;
+    text-align: left;
+    position: absolute;
+    line-height: 40px;
+    z-index: 1000;
+    float: left;
+    min-width: 160px;
+    padding: 5px 10px;
+    list-style: none;
+    background-color: #ffffff;
+    border: 1px solid #ccc;
+    border: 1px solid rgba(0, 0, 0, 0.2);
+    *border-right-width: 2px;
+    *border-bottom-width: 2px;
+    -webkit-border-radius: 6px;
+    -moz-border-radius: 6px;
+    border-radius: 6px;
+    -webkit-box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
+    -moz-box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
+    -webkit-background-clip: padding-box;
+    -moz-background-clip: padding;
+    background-clip: padding-box;
+  }
 }
 
 @media screen and (max-width: $break) {
@@ -132,16 +166,18 @@ nav {
       }
     }
 
+    .dropdown-menu {
+      li:nth-of-type(1n) {
+        background-color: $background-color;
+      }
+    }
+
     li {
       width: 100%;
       text-align: center;
       font-size: 1em;
       position: relative;
       background-color: darken($background-color, 2%);
-
-      &:nth-of-type(4n) {
-        background-color: $background-color;
-      }
 
       a {
         width: 100%;
