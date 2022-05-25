@@ -57,7 +57,7 @@ permalink: /soccer/
                       placement="top-start"
                       width="300"
                       trigger="hover"
-                      content="Use your mouse to pick the shooting location on the pitch, which will be automatically converted to a distance value from that location to the center of the goal on the right.">
+                      content="Your team is attacking the goal on the right. Use your mouse to pick the shooting location on the pitch, which will be automatically converted to a distance value from that location to the center of the goal.">
                       <i class="el-icon-question" slot="reference"></i>
                     </el-popover>
                   </div>
@@ -202,10 +202,6 @@ permalink: /soccer/
                   <el-switch active-color="#13ce66" v-model="ruleForm.pass_cross" @change="onChange"></el-switch>
                 </el-form-item>
 
-              <el-form-item>
-                <el-button :disabled="service_status!==0" round type="success" @click="submitForm('ruleForm')">Predict</el-button>
-              </el-form-item>
-
               <span v-if="service_status === 0">(Backend status: on)</span>
               <span v-else-if="service_status === 1">(Backend status: off)</span>
               <span v-else>(Backend is starting ...)</span>
@@ -262,10 +258,8 @@ permalink: /soccer/
                 return new Promise((resolve) => setTimeout(resolve, time))
             },
             async submitForm(formName) {
-              console.log(formName);
               this.$refs[formName].validate((valid) => {
                 if (valid) {
-                  console.log(this.ruleForm)
                   this.predict()
                 } else {
                   console.log('error submit!!');
@@ -311,7 +305,6 @@ permalink: /soccer/
                 this.drawBall(x, y);
                 this.$refs['ruleForm'].validate((valid) => {
                   if (valid) {
-                    console.log(this.ruleForm)
                     this.predict()
                   } else {
                     return false;
@@ -459,7 +452,7 @@ permalink: /soccer/
               this.ctx.beginPath();
               this.ctx.strokeStyle = "#FFF";
               this.ctx.font = "40px Arial";
-              this.ctx.strokeText(data, this.default_size.w / 2 - 50, this.default_size.h / 2 + 2);
+              this.ctx.strokeText(data, this.default_size.w / 2 - data.length * 7 , this.default_size.h / 4);
               this.ctx.stroke();
               this.ctx.closePath();
             },
@@ -479,7 +472,7 @@ permalink: /soccer/
                         // success
                         let data = (res.result*100).toFixed(2)+"%"
                         this.$message.success('Expected Goals of the Shot: ' + data);
-                        this.drawResult(data);
+                        this.drawResult("xG: " + data);
                     } else {
                         // error
                         this.$message.error(res.message);
@@ -493,7 +486,7 @@ permalink: /soccer/
             },
             onChange(callback){
               this.drawBall(this.default_position.x, this.default_position.y);
-              // this.predict();
+              this.predict();
             }
         }
     })
@@ -512,6 +505,7 @@ permalink: /soccer/
   }
   .panel-hint {
     margin-bottom: 20px;
+    font-size: 16px;
   }
   .form-label i{
     margin-left: 10px;
@@ -581,18 +575,17 @@ permalink: /soccer/
     display: inline-block;
     width: 6px;
     height: 6px;
-    margin-left: 24px;
+    margin-left: 10px;
     margin-right: 8px;
     background-image: linear-gradient(-180deg, #0ba360 0%, #3cba92 100%);
     border-radius: 6px;
     vertical-align: middle;
   }
   .property-panel .panel-wrapper {
-    padding: 0 20px;
     color: #060;
   }
   .property-panel .panel {
-    padding: 20px;
+    padding: 10px 20px;
   }
 </style>
 </body>
