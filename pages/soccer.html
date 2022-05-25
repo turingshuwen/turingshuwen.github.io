@@ -18,25 +18,6 @@ permalink: /soccer/
 <body style="background: white;">
 {% include navbar.html %}
 <div id="main">
-    <div class="pannels">
-      <div class="property-panel">
-        <div class="panel-wrapper">
-          <p class="panel-label">
-            <i></i>
-            <span>Expected Goals</span>
-          </p>
-        </div>
-        <div class="panel">
-          <div>
-            <div class="header-hint-text">Expected goals (xG) is the probability that a shot will result in a goal based on the characteristics of that shot and the events leading up to it.
-              Now we've built a machine learning model that can predict xG automatically.
-              Tweak the options below and see if its prediction makes sense.
-              <br/>Actually, this model can be improved in many aspects,
-              and we believe you can make a more awesome one by using advanced AI models or collecting more data from the FIFA World Cup and other major leagues like the Premier League, La Liga, etc.</div>
-          </div>
-        </div>
-      </div>
-    </div>
     <div id="app" class="app">
       <div class="game-side">
         <canvas id="pitch" :width="default_size.w" :height="default_size.h"></canvas>
@@ -47,17 +28,24 @@ permalink: /soccer/
           <div class="panel-wrapper">
             <p class="panel-label">
               <i></i>
-              <span >Soccer Match Features</span>
+              <span >Expected Goals</span>
             </p>
           </div>
           <div class="panel">
+            <div class="panel-hint">
+              Expected goals (xG) is the probability that a shot will result in a goal based on the characteristics of that shot and the events leading up to it. Tweak the options below and let AI predict xG.
+            </div>
             <el-form :model="ruleForm" ref="ruleForm" label-width="0px" label-position="left" size="mini">
                 <el-form-item prop="duration" required>
                   <div class="form-label">
                     <label>Duration</label>
-                    <el-tooltip class="item" effect="dark" content="The length in seconds the shot action lasted." placement="top-start">
-                      <i class="el-icon-question"></i>
-                    </el-tooltip>
+                    <el-popover
+                      placement="top-start"
+                      width="300"
+                      trigger="hover"
+                      content="The length in seconds the shot action lasted.">
+                      <i class="el-icon-question" slot="reference"></i>
+                    </el-popover>
                   </div>
                   <el-input class="form-input" v-model="ruleForm.duration" @change="onChange"></el-input>
                 </el-form-item>
@@ -65,9 +53,13 @@ permalink: /soccer/
                 <el-form-item prop="distance" >
                   <div class="form-label">
                     <label>Distance</label>
-                    <el-tooltip content="Use your mouse to pick the shooting location on the pitch, which will be automatically converted to a distance value from that location to the center of the goal." placement="top-start">
-                      <i class="el-icon-question"></i>
-                    </el-tooltip>
+                    <el-popover
+                      placement="top-start"
+                      width="300"
+                      trigger="hover"
+                      content="Use your mouse to pick the shooting location on the pitch, which will be automatically converted to a distance value from that location to the center of the goal on the right.">
+                      <i class="el-icon-question" slot="reference"></i>
+                    </el-popover>
                   </div>
                   <el-input class="form-input" v-model.number="ruleForm.distance" :disabled="true"></el-input>
                 </el-form-item>
@@ -75,9 +67,13 @@ permalink: /soccer/
                 <el-form-item prop="build_up_duration" required>
                   <div class="form-label">
                     <label>Build-up duration</label>
-                    <el-tooltip content="The length in seconds of all the actions of the attacking team before the shot. The attacking team has possession of the ball during all those actions." placement="top-start">
-                      <i class="el-icon-question"></i>
-                    </el-tooltip>
+                    <el-popover
+                      placement="top-start"
+                      width="300"
+                      trigger="hover"
+                      content="The length in seconds of all the actions of the attacking team before the shot. The attacking team has possession of the ball during all those actions.">
+                      <i class="el-icon-question" slot="reference"></i>
+                    </el-popover>
                   </div>
                   <el-input class="form-input" v-model="ruleForm.build_up_duration" @change="onChange"></el-input>
                 </el-form-item>
@@ -85,9 +81,13 @@ permalink: /soccer/
                 <el-form-item prop="shot_technique">
                   <div class="form-label">
                     <label>Shot technique</label>
-                    <el-tooltip content="Name of the technique used for the shot." placement="top-start">
-                      <i class="el-icon-question"></i>
-                    </el-tooltip>
+                    <el-popover
+                      placement="top-start"
+                      width="300"
+                      trigger="hover"
+                      content="Name of the technique used for the shot.">
+                      <i class="el-icon-question" slot="reference"></i>
+                    </el-popover>
                   </div>
                   <el-select class="form-input" v-model="ruleForm.shot_technique" placeholder="Name of the technique used for the shot." @change="onChange">
                     <el-option label="Backheel" value="backheel"></el-option>
@@ -103,9 +103,13 @@ permalink: /soccer/
                 <el-form-item label="" prop="shot_open_goal">
                   <div class="form-label">
                     <label>Open goal</label>
-                    <el-tooltip content="Whether or not the shot is taken with an open goal." placement="top-start">
-                      <i class="el-icon-question"></i>
-                    </el-tooltip>
+                    <el-popover
+                      placement="top-start"
+                      width="300"
+                      trigger="hover"
+                      content="Whether or not the shot is taken with an open goal.">
+                      <i class="el-icon-question" slot="reference"></i>
+                    </el-popover>
                   </div>
                   <el-switch active-color="#13ce66" v-model="ruleForm.shot_open_goal" @change="onChange"></el-switch>
                 </el-form-item>
@@ -113,9 +117,13 @@ permalink: /soccer/
                 <el-form-item prop="pass_height_value">
                   <div class="form-label">
                     <label>Pass height</label>
-                    <el-tooltip content="Height of the pass." placement="top-start">
-                      <i class="el-icon-question"></i>
-                    </el-tooltip>
+                    <el-popover
+                      placement="top-start"
+                      width="300"
+                      trigger="hover"
+                      content="Height of the pass.">
+                      <i class="el-icon-question" slot="reference"></i>
+                    </el-popover>
                   </div>
                   <el-select class="form-input" v-model="ruleForm.pass_height_value" placeholder="Name of the technique used for the shot." @change="onChange">
                     <el-option label="Ground Pass" value="ground_pass"></el-option>
@@ -127,9 +135,13 @@ permalink: /soccer/
                 <el-form-item prop="pass_cut_back">
                   <div class="form-label">
                     <label>Cut-back</label>
-                    <el-tooltip content="Whether or not the pass is a cut-back, i.e., ball low or ground passed backwards within the opposition’s penalty box." placement="top-start">
-                      <i class="el-icon-question"></i>
-                    </el-tooltip>
+                    <el-popover
+                      placement="top-start"
+                      width="300"
+                      trigger="hover"
+                      content="Whether or not the pass is a cut-back, i.e., ball low or ground passed backwards within the opposition’s penalty box.">
+                      <i class="el-icon-question" slot="reference"></i>
+                    </el-popover>
                   </div>
                   <el-switch active-color="#13ce66" v-model="ruleForm.pass_cut_back" @change="onChange"></el-switch>
                 </el-form-item>
@@ -137,9 +149,13 @@ permalink: /soccer/
                 <el-form-item prop="pass_through_ball">
                   <div class="form-label">
                     <label>Through ball</label>
-                    <el-tooltip content="Whether or not the pass cuts the last line of defense." placement="top-start">
-                      <i class="el-icon-question"></i>
-                    </el-tooltip>
+                    <el-popover
+                      placement="top-start"
+                      width="300"
+                      trigger="hover"
+                      content="Whether or not the pass cuts the last line of defense.">
+                      <i class="el-icon-question" slot="reference"></i>
+                    </el-popover>
                   </div>
                   <el-switch active-color="#13ce66" v-model="ruleForm.pass_through_ball" @change="onChange"></el-switch>
                 </el-form-item>
@@ -147,9 +163,13 @@ permalink: /soccer/
                 <el-form-item label="" prop="follows_goalkeeper">
                   <div class="form-label">
                     <label>After goal keeper</label>
-                    <el-tooltip content="Whether or not the action immediately before the shot is from the goal keeper." placement="top-start">
-                      <i class="el-icon-question"></i>
-                    </el-tooltip>
+                    <el-popover
+                      placement="top-start"
+                      width="300"
+                      trigger="hover"
+                      content="Whether or not the action immediately before the shot is from the goal keeper.">
+                      <i class="el-icon-question" slot="reference"></i>
+                    </el-popover>
                   </div>
                   <el-switch active-color="#13ce66" v-model="ruleForm.follows_goalkeeper" @change="onChange"></el-switch>
                 </el-form-item>
@@ -157,9 +177,13 @@ permalink: /soccer/
                 <el-form-item prop="follows_dribble">
                   <div class="form-label">
                     <label>After dribble</label>
-                    <el-tooltip content="Whether or not this shot comes after a successful dribble by the shooter." placement="top-start">
-                      <i class="el-icon-question"></i>
-                    </el-tooltip>
+                    <el-popover
+                      placement="top-start"
+                      width="300"
+                      trigger="hover"
+                      content="Whether or not this shot comes after a successful dribble by the shooter.">
+                      <i class="el-icon-question" slot="reference"></i>
+                    </el-popover>
                   </div>
                   <el-switch active-color="#13ce66" v-model="ruleForm.follows_dribble" @change="onChange"></el-switch>
                 </el-form-item>
@@ -167,9 +191,13 @@ permalink: /soccer/
                 <el-form-item label="" prop="pass_cross">
                   <div class="form-label">
                     <label>Cross pass</label>
-                    <el-tooltip content="Whether or not the pass is a cross." placement="top-start">
-                      <i class="el-icon-question"></i>
-                    </el-tooltip>
+                    <el-popover
+                      placement="top-start"
+                      width="300"
+                      trigger="hover"
+                      content="Whether or not the pass is a cross.">
+                      <i class="el-icon-question" slot="reference"></i>
+                    </el-popover>
                   </div>
                   <el-switch active-color="#13ce66" v-model="ruleForm.pass_cross" @change="onChange"></el-switch>
                 </el-form-item>
@@ -207,7 +235,7 @@ permalink: /soccer/
           ruleForm: {
             duration: 1,
             distance: 0,
-            build_up_duration: 16,
+            build_up_duration: 1,
             shot_technique: 'normal',
             shot_open_goal: true,
             pass_height_value: 'ground_pass',
@@ -450,7 +478,7 @@ permalink: /soccer/
                     if (res.code === 0) {
                         // success
                         let data = (res.result*100).toFixed(2)+"%"
-                        this.$message.success('Success: ' + data);
+                        this.$message.success('Expected Goals of the Shot: ' + data);
                         this.drawResult(data);
                     } else {
                         // error
@@ -471,10 +499,19 @@ permalink: /soccer/
     })
 </script>
 <style lang="scss">
+  .el-popover {
+    font-size: 18px;
+    word-break: break-word;
+    white-space: pre-wrap;
+    text-align: left;
+  }
   .form-label {
     width: 150px;
     display: inline-flex;
     align-items: center;
+  }
+  .panel-hint {
+    margin-bottom: 20px;
   }
   .form-label i{
     margin-left: 10px;
@@ -507,9 +544,11 @@ permalink: /soccer/
     padding-left: 10px;
     width: 0;
     text-align: center;
-    flex-grow: 2;
+    flex-grow: 3;
   }
   .pannels {
+    width: 0;
+    flex-grow: 1;
   }
   header {
     float: none !important;
