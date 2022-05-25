@@ -1,0 +1,560 @@
+---
+title : AI Soccer
+permalink: /soccer/
+---
+
+<!DOCTYPE html>
+<html lang="en">
+{% include head.html %}
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cat vs Dog</title>
+    <script src="https://cdn.staticfile.org/vue/2.6.9/vue.min.js"></script>
+    <script src="https://cdn.staticfile.org/element-ui/2.15.7/index.min.js"></script>
+    <script src="https://cdn.staticfile.org/vue-resource/1.5.3/vue-resource.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.staticfile.org/element-ui/2.15.7/theme-chalk/index.min.css"></link>
+</head>
+<body style="background: white;">
+{% include navbar.html %}
+<div id="main">
+    <div class="pannels">
+      <div class="property-panel">
+        <div class="panel-wrapper">
+          <p class="panel-label">
+            <i></i>
+            <span>Expected Goals</span>
+          </p>
+        </div>
+        <div class="panel">
+          <div>
+            <div class="header-hint-text">Expected goals (xG) is the probability that a shot will result in a goal based on the characteristics of that shot and the events leading up to it.
+              Now we've built a machine learning model that can predict xG automatically.
+              Tweak the options below and see if its prediction makes sense.
+              <br/>Actually, this model can be improved in many aspects,
+              and we believe you can make a more awesome one by using advanced AI models or collecting more data from the FIFA World Cup and other major leagues like the Premier League, La Liga, etc.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div id="app" class="app">
+      <div class="game-side">
+        <canvas id="pitch" :width="default_size.w" :height="default_size.h"></canvas>
+      </div>
+
+      <div class="pannels">
+        <div class="property-panel">
+          <div class="panel-wrapper">
+            <p class="panel-label">
+              <i></i>
+              <span >Soccer Match Features</span>
+            </p>
+          </div>
+          <div class="panel">
+            <el-form :model="ruleForm" ref="ruleForm" label-width="0px" label-position="left" size="mini">
+                <el-form-item prop="duration" required>
+                  <div class="form-label">
+                    <label>Duration</label>
+                    <el-tooltip class="item" effect="dark" content="The length in seconds the shot action lasted." placement="top-start">
+                      <i class="el-icon-question"></i>
+                    </el-tooltip>
+                  </div>
+                  <el-input class="form-input" v-model="ruleForm.duration" @change="onChange"></el-input>
+                </el-form-item>
+
+                <el-form-item prop="distance" >
+                  <div class="form-label">
+                    <label>Distance</label>
+                    <el-tooltip content="Use your mouse to pick the shooting location on the pitch, which will be automatically converted to a distance value from that location to the center of the goal." placement="top-start">
+                      <i class="el-icon-question"></i>
+                    </el-tooltip>
+                  </div>
+                  <el-input class="form-input" v-model.number="ruleForm.distance" :disabled="true"></el-input>
+                </el-form-item>
+
+                <el-form-item prop="build_up_duration" required>
+                  <div class="form-label">
+                    <label>Build-up duration</label>
+                    <el-tooltip content="The length in seconds of all the actions of the attacking team before the shot. The attacking team has possession of the ball during all those actions." placement="top-start">
+                      <i class="el-icon-question"></i>
+                    </el-tooltip>
+                  </div>
+                  <el-input class="form-input" v-model="ruleForm.build_up_duration" @change="onChange"></el-input>
+                </el-form-item>
+
+                <el-form-item prop="shot_technique">
+                  <div class="form-label">
+                    <label>Shot technique</label>
+                    <el-tooltip content="Name of the technique used for the shot." placement="top-start">
+                      <i class="el-icon-question"></i>
+                    </el-tooltip>
+                  </div>
+                  <el-select class="form-input" v-model="ruleForm.shot_technique" placeholder="Name of the technique used for the shot." @change="onChange">
+                    <el-option label="Backheel" value="backheel"></el-option>
+                    <el-option label="Diving Header" value="diving_header"></el-option>
+                    <el-option label="Half Volley" value="half_volley"></el-option>
+                    <el-option label="Lob" value="lob"></el-option>
+                    <el-option label="Normal" value="normal"></el-option>
+                    <el-option label="Overhead Kick" value="overhead_kick"></el-option>
+                    <el-option label="Volley" value="volley"></el-option>
+                  </el-select>
+                </el-form-item>
+
+                <el-form-item label="" prop="shot_open_goal">
+                  <div class="form-label">
+                    <label>Open goal</label>
+                    <el-tooltip content="Whether or not the shot is taken with an open goal." placement="top-start">
+                      <i class="el-icon-question"></i>
+                    </el-tooltip>
+                  </div>
+                  <el-switch active-color="#13ce66" v-model="ruleForm.shot_open_goal" @change="onChange"></el-switch>
+                </el-form-item>
+
+                <el-form-item prop="pass_height_value">
+                  <div class="form-label">
+                    <label>Pass height</label>
+                    <el-tooltip content="Height of the pass." placement="top-start">
+                      <i class="el-icon-question"></i>
+                    </el-tooltip>
+                  </div>
+                  <el-select class="form-input" v-model="ruleForm.pass_height_value" placeholder="Name of the technique used for the shot." @change="onChange">
+                    <el-option label="Ground Pass" value="ground_pass"></el-option>
+                    <el-option label="Low Pass" value="low_pass"></el-option>
+                    <el-option label="High Pass" value="high_pass"></el-option>
+                  </el-select>
+                </el-form-item>
+
+                <el-form-item prop="pass_cut_back">
+                  <div class="form-label">
+                    <label>Cut-back</label>
+                    <el-tooltip content="Whether or not the pass is a cut-back, i.e., ball low or ground passed backwards within the opposition’s penalty box." placement="top-start">
+                      <i class="el-icon-question"></i>
+                    </el-tooltip>
+                  </div>
+                  <el-switch active-color="#13ce66" v-model="ruleForm.pass_cut_back" @change="onChange"></el-switch>
+                </el-form-item>
+
+                <el-form-item prop="pass_through_ball">
+                  <div class="form-label">
+                    <label>Through ball</label>
+                    <el-tooltip content="Whether or not the pass cuts the last line of defense." placement="top-start">
+                      <i class="el-icon-question"></i>
+                    </el-tooltip>
+                  </div>
+                  <el-switch active-color="#13ce66" v-model="ruleForm.pass_through_ball" @change="onChange"></el-switch>
+                </el-form-item>
+
+                <el-form-item label="" prop="follows_goalkeeper">
+                  <div class="form-label">
+                    <label>After goal keeper</label>
+                    <el-tooltip content="Whether or not the action immediately before the shot is from the goal keeper." placement="top-start">
+                      <i class="el-icon-question"></i>
+                    </el-tooltip>
+                  </div>
+                  <el-switch active-color="#13ce66" v-model="ruleForm.follows_goalkeeper" @change="onChange"></el-switch>
+                </el-form-item>
+
+                <el-form-item prop="follows_dribble">
+                  <div class="form-label">
+                    <label>After dribble</label>
+                    <el-tooltip content="Whether or not this shot comes after a successful dribble by the shooter." placement="top-start">
+                      <i class="el-icon-question"></i>
+                    </el-tooltip>
+                  </div>
+                  <el-switch active-color="#13ce66" v-model="ruleForm.follows_dribble" @change="onChange"></el-switch>
+                </el-form-item>
+
+                <el-form-item label="" prop="pass_cross">
+                  <div class="form-label">
+                    <label>Cross pass</label>
+                    <el-tooltip content="Whether or not the pass is a cross." placement="top-start">
+                      <i class="el-icon-question"></i>
+                    </el-tooltip>
+                  </div>
+                  <el-switch active-color="#13ce66" v-model="ruleForm.pass_cross" @change="onChange"></el-switch>
+                </el-form-item>
+
+              <el-form-item>
+                <el-button :disabled="service_status!==0" round type="success" @click="submitForm('ruleForm')">Predict</el-button>
+              </el-form-item>
+
+              <span v-if="service_status === 0">(Backend status: on)</span>
+              <span v-else-if="service_status === 1">(Backend status: off)</span>
+              <span v-else>(Backend is starting ...)</span>
+
+            </el-form>
+          </div>
+        </div>
+      </div>
+    </div>
+</div>
+{% include footer.html %}
+
+<script>
+    new Vue({
+        el: '#app',
+        data: {
+          canvas: {},
+          ctx: {},
+          default_size: {
+            w: 960,
+            h: 640
+          },
+          default_position: {
+            x: 30,
+            y: 40
+          },
+          ruleForm: {
+            duration: 1,
+            distance: 0,
+            build_up_duration: 16,
+            shot_technique: 'normal',
+            shot_open_goal: true,
+            pass_height_value: 'ground_pass',
+            pass_cut_back: false,
+            pass_through_ball: false,
+            follows_goalkeeper: false,
+            follows_dribble: false,
+            pass_cross: false,
+         },
+          backend_url: 'https://service-gw30fymc-1302242949.gz.apigw.tencentcs.com/release/',
+          service_status: 2, // 0: on; 1: off; others: wait start
+        },
+        mounted() {
+          this.setCallback();
+          this.drawBall(this.default_position.x * 8, this.default_position.y * 8);
+          setTimeout(() => {
+              (async () => {
+                  await this.init_service()
+              })()
+          }, 0);
+        },
+        methods: {
+            sleep(time) {
+                return new Promise((resolve) => setTimeout(resolve, time))
+            },
+            async submitForm(formName) {
+              console.log(formName);
+              this.$refs[formName].validate((valid) => {
+                if (valid) {
+                  console.log(this.ruleForm)
+                  this.predict()
+                } else {
+                  console.log('error submit!!');
+                  return false;
+                }
+              });
+            },
+            async init_service() {
+                let url = this.backend_url;
+                url += url.substr(url.length - 1, 1) === '/' ? 'healthy' : '/healthy'
+                while (this.service_status !== 0) {
+                    try {
+                        let res = await this.$http.get(url, {
+                            timeout: 20000,
+                        })
+                        res = res.body;
+                        this.service_status = res['status']
+                        console.log("service status: ", this.service_status)
+                        break;
+                    } catch (e) {
+                        console.log(e)
+                        this.service_status = 2;// timeout, service is starting
+                    }
+                    await this.sleep(1000);
+                }
+            },
+            isMobile() {
+                return navigator.userAgent.match(/(phone|pad|pod|iPhone|iPod|ios|iPad|Android|Mobile|BlackBerry|IEMobile|MQQBrowser|JUC|Fennec|wOSBrowser|BrowserNG|WebOS|Symbian|Windows Phone)/i);
+            },
+            setCallback() {
+              this.canvas = document.getElementById('pitch');
+              this.ctx = this.canvas.getContext('2d');
+              this.canvas.addEventListener("click", (evt) => {
+                let rect = this.canvas.getBoundingClientRect();
+                let x = evt.clientX;
+                let y = evt.clientY;
+                x -= rect.left;
+                y -= rect.top;
+                x = x * this.default_size.w / rect.width;
+                y = y * this.default_size.h / rect.height;
+                if (x < 0) x = 0;
+                if (y < 0) y = 0;
+                this.drawBall(x, y);
+                this.$refs['ruleForm'].validate((valid) => {
+                  if (valid) {
+                    console.log(this.ruleForm)
+                    this.predict()
+                  } else {
+                    return false;
+                  }
+                });
+              });
+            },
+            drawBall(x, y) {
+              this.drawPitch();
+
+              //draw ball
+              this.ctx.beginPath();
+              this.ctx.arc(x, y, 10, 0, 2*Math.PI, false);
+              this.ctx.fillStyle = "#FFF";
+              this.ctx.fill();
+              this.ctx.strokeStyle = "#000";
+              this.ctx.stroke();
+              this.ctx.closePath();
+
+              //save current position
+              this.default_position.x = x;
+              this.default_position.y = y;
+
+              //calculatte distance
+              let distance = Math.sqrt((x/8 - 120)**2 + (y/8 - 40)**2)
+              distance = Math.floor(distance * 100) / 100;
+              this.$set(this.ruleForm, 'distance', distance);
+            },
+            drawPitch() {
+              let canvas = document.getElementById('pitch');
+              let ctx = canvas.getContext('2d');
+              // Outer lines
+              ctx.beginPath();
+              ctx.rect(0,0, canvas.width, canvas.height);
+              ctx.fillStyle = "#060";
+              ctx.fill();
+              ctx.lineWidth = 1;
+              ctx.strokeStyle = "#FFF";
+              ctx.stroke();
+              ctx.closePath();
+
+              ctx.fillStyle = "#FFF";
+
+              // Mid line
+              ctx.beginPath();
+              ctx.moveTo(canvas.width / 2, 0);
+              ctx.lineTo(canvas.width / 2, canvas.height);
+              ctx.stroke();
+              ctx.closePath();
+
+              //Mid circle
+              ctx.beginPath()
+              ctx.arc(canvas.width / 2, canvas.height / 2, 73, 0, 2*(Math.PI), false);
+              ctx.stroke();
+              ctx.closePath();
+              //Mid point
+              ctx.beginPath()
+              ctx.arc(canvas.width / 2, canvas.height / 2, 2, 0, 2*Math.PI, false);
+              ctx.fill();
+              ctx.closePath();
+
+              // //Home penalty box
+              // ctx.beginPath();
+              // ctx.rect(0, (canvas.height - 322) / 2, 132, 322);
+              // ctx.stroke();
+              ctx.closePath();
+              //Home goal box
+              ctx.beginPath();
+              ctx.rect(0, (canvas.height - 146) / 2, 44, 146);
+              ctx.stroke();
+              ctx.closePath();
+              //Home goal
+              ctx.beginPath();
+              ctx.moveTo(1, (canvas.height / 2) - 22);
+              ctx.lineTo(1, (canvas.height / 2) + 22);
+              ctx.lineWidth = 10;
+              ctx.stroke();
+              ctx.closePath();
+              ctx.lineWidth = 1;
+
+              // //Home penalty point
+              // ctx.beginPath()
+              // ctx.arc(88, canvas.height / 2, 1, 0, 2*Math.PI, true);
+              // ctx.fill();
+              // ctx.closePath();
+              // //Home half circle
+              // ctx.beginPath()
+              // ctx.arc(88, canvas.height / 2, 73, 0.29*Math.PI, 1.71*Math.PI, true);
+              // ctx.stroke();
+              // ctx.closePath();
+
+              //Away penalty box
+              // ctx.beginPath();
+              // ctx.rect(canvas.width-132, (canvas.height - 322) / 2, 132, 322);
+              // ctx.stroke();
+              // ctx.closePath();
+              //Away goal box
+              ctx.beginPath();
+              ctx.rect(canvas.width-44, (canvas.height - 146) / 2, 44, 146);
+              ctx.stroke();
+              ctx.closePath();
+              //Away goal
+              ctx.beginPath();
+              ctx.moveTo(canvas.width-1, (canvas.height / 2) - 22);
+              ctx.lineTo(canvas.width-1, (canvas.height / 2) + 22);
+              ctx.lineWidth = 10;
+              ctx.stroke();
+              ctx.closePath();
+              ctx.lineWidth = 1;
+              // //Away penalty point
+              // ctx.beginPath()
+              // ctx.arc(canvas.width-88, canvas.height / 2, 1, 0, 2*Math.PI, true);
+              // ctx.fill();
+              // ctx.closePath();
+              // //Away half circle
+              // ctx.beginPath()
+              // ctx.arc(canvas.width-88, canvas.height / 2, 73, 0.71*Math.PI, 1.29*Math.PI, false);
+              // ctx.stroke();
+              // ctx.closePath();
+
+              //Home L corner
+              ctx.beginPath()
+              ctx.arc(0, 0, 16, 0, 0.5*Math.PI, false);
+              ctx.stroke();
+              ctx.closePath();
+              //Home R corner
+              ctx.beginPath()
+              ctx.arc(0, canvas.height, 16, 0, 2*Math.PI, true);
+              ctx.stroke();
+              ctx.closePath();
+              //Away R corner
+              ctx.beginPath()
+              ctx.arc(canvas.width, 0, 16, 0.5*Math.PI, 1*Math.PI, false);
+              ctx.stroke();
+              ctx.closePath();
+              //Away L corner
+              ctx.beginPath()
+              ctx.arc(canvas.width, canvas.height, 16, 1*Math.PI, 1.5*Math.PI, false);
+              ctx.stroke();
+              ctx.closePath();
+            },
+            drawResult(data) {
+              this.drawPitch();
+              this.drawBall(this.default_position.x, this.default_position.y);
+              this.ctx.beginPath();
+              this.ctx.strokeStyle = "#FFF";
+              this.ctx.font = "40px Arial";
+              this.ctx.strokeText(data, this.default_size.w / 2 - 50, this.default_size.h / 2 + 2);
+              this.ctx.stroke();
+              this.ctx.closePath();
+            },
+            async predict() {
+                if (this.service_status != 0){
+                  this.$message.error("Backend is starting ...");
+                  return;
+                }
+                try {
+                    let res = await this.$http.post(this.backend_url, this.ruleForm, {
+                        timeout: 0,
+                        emulateJSON: true
+                    })
+                    res = res.body
+                    console.log(res)
+                    if (res.code === 0) {
+                        // success
+                        let data = (res.result*100).toFixed(2)+"%"
+                        this.$message.success('Success: ' + data);
+                        this.drawResult(data);
+                    } else {
+                        // error
+                        this.$message.error(res.message);
+                    }
+                } catch (e) {
+                    console.log('predict', e)
+                    this.$message.error('Backend busy. Please try again.');
+                } finally {
+                    this.loading = false;
+                }
+            },
+            onChange(callback){
+              this.drawBall(this.default_position.x, this.default_position.y);
+              // this.predict();
+            }
+        }
+    })
+</script>
+<style lang="scss">
+  .form-label {
+    width: 150px;
+    display: inline-flex;
+    align-items: center;
+  }
+  .form-label i{
+    margin-left: 10px;
+  }
+  .form-label label{
+    display:inline-block;
+  }
+  .el-form-item__content {
+    display: flex;
+    align-items: center;
+  }
+
+  .form-input{
+    max-width: 100px;
+  }
+
+  .header-hint-text {
+    margin: 0 100px;
+    color: #333;
+  }
+  #pitch {
+    width: 100%;
+    cursor: crosshair;
+  }
+  .app {
+    display: flex;
+    justify-content: space-around;
+  }
+  .game-side {
+    padding-left: 10px;
+    width: 0;
+    text-align: center;
+    flex-grow: 2;
+  }
+  .pannels {
+  }
+  header {
+    float: none !important;
+  }
+  .pannels .game-start {
+    margin-top: 40px;
+    padding: 0 10%;
+  }
+  .pannels .game-start .el-button {
+    width: 100%;
+  }
+
+  /* panel style */
+  .property-panel .panel-wrapper {
+    display: flex;
+    background-color: #c1dfc4;
+    line-height: 45px;
+  }
+  .property-panel .panel-wrapper .panel-label {
+    user-select: none;
+    -webkit-user-select: none;
+    font-size: 20px;
+    color: #333;
+    letter-spacing: 1.25px;
+    text-align: left;
+    margin: 0;
+    padding: 10px;
+  }
+  .property-panel .panel-wrapper .panel-label i {
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    margin-left: 24px;
+    margin-right: 8px;
+    background-image: linear-gradient(-180deg, #0ba360 0%, #3cba92 100%);
+    border-radius: 6px;
+    vertical-align: middle;
+  }
+  .property-panel .panel-wrapper {
+    padding: 0 20px;
+    color: #060;
+  }
+  .property-panel .panel {
+    padding: 20px;
+  }
+</style>
+</body>
+</html>
