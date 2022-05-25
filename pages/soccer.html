@@ -20,6 +20,9 @@ permalink: /soccer/
 <div id="main">
     <div id="app" class="app">
       <div class="game-side">
+        <span class="status" v-if="service_status === 0">(Backend status: on)</span>
+        <span class="status" v-else-if="service_status === 1">(Backend status: off)</span>
+        <span class="status" v-else>(Backend is starting ...)</span>
         <canvas id="pitch" :width="default_size.w" :height="default_size.h"></canvas>
       </div>
 
@@ -201,11 +204,6 @@ permalink: /soccer/
                   </div>
                   <el-switch active-color="#13ce66" v-model="ruleForm.pass_cross" @change="onChange"></el-switch>
                 </el-form-item>
-
-              <span v-if="service_status === 0">(Backend status: on)</span>
-              <span v-else-if="service_status === 1">(Backend status: off)</span>
-              <span v-else>(Backend is starting ...)</span>
-
             </el-form>
           </div>
         </div>
@@ -492,6 +490,12 @@ permalink: /soccer/
     })
 </script>
 <style lang="scss">
+  .status {
+    position: relative;
+    color: white;
+    left: 20px;
+    height: 25px;
+  }
   .el-popover {
     font-size: 18px;
     word-break: break-word;
@@ -529,6 +533,7 @@ permalink: /soccer/
   #pitch {
     width: 100%;
     cursor: crosshair;
+    margin-top: -25px;
   }
   .app {
     display: flex;
@@ -537,7 +542,7 @@ permalink: /soccer/
   .game-side {
     padding-left: 10px;
     width: 0;
-    text-align: center;
+    text-align: left;
     flex-grow: 3;
   }
   .pannels {
